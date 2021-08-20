@@ -37,7 +37,7 @@ jobs:
       - name: Make
         run: |
             mkdir ./public
-            ruby viz/tree.rb data public /test
+            ruby viz/tree.rb data public /trex-loadtest-results
 
       # Deploy public/ subdir into the gh-pages branch
       - name: Deploy
