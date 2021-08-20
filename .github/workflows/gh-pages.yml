@@ -1,0 +1,48 @@
+name: GitHub Pages
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-20.04
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+    steps:
+      # Checkout data
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          repository: wejn/trex-loadtest-results
+          ref: master
+          path: data
+
+      # Fetch Ruby
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 2.6
+
+      # Checkout the viz script
+      - name: Checkout viz
+        uses: actions/checkout@v2
+        with:
+          repository: wejn/trex-loadtest-viz
+          path: viz
+
+      # Run the script, outputting to public/ subdir
+      - name: Make
+        run: |
+            mkdir ./public
+            ruby viz/tree.rb data public /test
+
+      # Deploy public/ subdir into the gh-pages branch
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3
+        if: ${{ github.ref == 'refs/heads/master' }}
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public
